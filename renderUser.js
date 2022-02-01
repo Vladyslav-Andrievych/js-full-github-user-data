@@ -7,5 +7,5 @@ export const renderUserData = (userData) => {
 
   userAvatarElem.src = avatar_url;
   userNameElem.textContent = name;
-  userLocationElem.textContent = location ? location : '';
+  userLocationElem.textContent = location ? `from ${location}` : '';
 };
