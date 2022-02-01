@@ -1,29 +1,39 @@
+import { getUserData, getReposList } from './gateways.js';
+import { renderReposList, cleanRepoList } from './renderRepos.js';
+import { renderUserData } from './renderUser.js';
+import { hideSpinner, showSpinner } from './spinner.js';
+
+const defaultUser = {
+  avatar_url: 'https://avatars3.githubusercontent.com/u10001',
+  name: '',
+  location: '',
+};
+
+renderUserData(defaultUser);
+
 const buttonElem = document.querySelector('.name-form__btn');
-
-const getUserData = (userName) => {
-  return fetch(`https://api.github.com/users/${userName}`)
-    .then(response => response.json());
-};
-
-const renderUserData = (userData) => {
-  const userAvatarElem = document.querySelector('.user__avatar');
-  const userNameElem = document.querySelector('.user__name');
-  const userLocationElem = document.querySelector('.user__location');
-
-  const { avatar_url, name, location } = userData;
-
-  userAvatarElem.src = avatar_url;
-  userNameElem.textContent = name;
-  userLocationElem.textContent = location;
-};
+const inputElem = document.querySelector('.name-form__input');
 
 const onSearchClick = () => {
-  const inputElem = document.querySelector('.name-form__input');
-
+  showSpinner();
+  cleanRepoList();
   const userName = inputElem.value;
 
   getUserData(userName)
-    .then(userData => renderUserData(userData));
+    .then((userData) => {
+      renderUserData(userData);
+      return userData.repos_url;
+    })
+    .then((url) => getReposList(url))
+    .then((reposList) => {
+      renderReposList(reposList);
+    })
+    .catch((err) => {
+      alert(err.message);
+    })
+    .finally(() => {
+      hideSpinner();
+    });
 };
 
 buttonElem.addEventListener('click', onSearchClick);
